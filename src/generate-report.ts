@@ -28,7 +28,7 @@ export async function fetchPullRequests(gitApi: GitApi.IGitApi, repoId: string, 
     const criteria: GitPullRequestSearchCriteria = {
         status: PullRequestStatus.All
     };
-    return await gitApi.getPullRequests(repoId, criteria, undefined, 0, top);
+    return await gitApi.getPullRequests(repoId, criteria, undefined, undefined, 0, top);
 }
 
 export async function fetchPrThreads(gitApi: GitApi.IGitApi, repoId: string, prId: number): Promise<GitPullRequestCommentThread[]> {
@@ -71,22 +71,22 @@ export function calculateReviewerResponse(pr: GitPullRequest, threads: GitPullRe
     // Check votes
     if (pr.reviewers) {
         for (const reviewer of pr.reviewers) {
-             // We can't easily get the timestamp of the vote from the reviewer object directly in the list
-             // However, often the vote comes with a system comment or we assume the reviewer is active if they voted.
-             // But for "Response Time" accurately, we need the timestamp.
-             // The prompt says "time from PR creation to their first vote or comment".
-             // We'll prioritize comments for timestamp as they are in threads.
-             // Votes might need looking at `identities` or specific API calls?
-             // Actually, `GitPullRequest` reviewer list doesn't have vote timestamp.
-             // We will rely on Threads for comments.
-             // BUT, if someone voted without commenting?
-             // We might miss it if we only look at threads.
-             // However, usually a vote creates a system message in threads?
-             // Let's stick to comments in threads for now as it's more reliable with timestamps available.
+            // We can't easily get the timestamp of the vote from the reviewer object directly in the list
+            // However, often the vote comes with a system comment or we assume the reviewer is active if they voted.
+            // But for "Response Time" accurately, we need the timestamp.
+            // The prompt says "time from PR creation to their first vote or comment".
+            // We'll prioritize comments for timestamp as they are in threads.
+            // Votes might need looking at `identities` or specific API calls?
+            // Actually, `GitPullRequest` reviewer list doesn't have vote timestamp.
+            // We will rely on Threads for comments.
+            // BUT, if someone voted without commenting?
+            // We might miss it if we only look at threads.
+            // However, usually a vote creates a system message in threads?
+            // Let's stick to comments in threads for now as it's more reliable with timestamps available.
 
-             // Wait, the prompt says "Reviewer Performance: Identify the 'Primary Reviewer' for each PR and calculate their Response Time".
-             // Primary Reviewer could be the one who approved it or the first one to respond.
-             // Let's assume Lead Reviewer is the first one to respond (non-author).
+            // Wait, the prompt says "Reviewer Performance: Identify the 'Primary Reviewer' for each PR and calculate their Response Time".
+            // Primary Reviewer could be the one who approved it or the first one to respond.
+            // Let's assume Lead Reviewer is the first one to respond (non-author).
         }
     }
 
@@ -99,20 +99,20 @@ export function calculateReviewerResponse(pr: GitPullRequest, threads: GitPullRe
                 // We want human interaction.
 
                 if (comment.author?.uniqueName !== pr.createdBy?.uniqueName && comment.publishedDate) {
-                     // Check if it's a valid response (not system, unless we want to count vote system messages which we probably don't have distinct timestamps for easily without parsing)
-                     // Prompt says "human-only comments (excluding CommentType.System)".
-                     // So we ignore system comments for engagement count.
-                     // But for response time? "time from PR creation to their first vote or comment".
-                     // If we exclude system comments, we exclude vote notifications if they appear as such.
-                     // But usually standard is: Response Time = Time until first human comment from someone else.
+                    // Check if it's a valid response (not system, unless we want to count vote system messages which we probably don't have distinct timestamps for easily without parsing)
+                    // Prompt says "human-only comments (excluding CommentType.System)".
+                    // So we ignore system comments for engagement count.
+                    // But for response time? "time from PR creation to their first vote or comment".
+                    // If we exclude system comments, we exclude vote notifications if they appear as such.
+                    // But usually standard is: Response Time = Time until first human comment from someone else.
 
-                     if (comment.commentType !== CommentType.System) {
-                         const commentTime = new Date(comment.publishedDate).getTime();
-                         if (commentTime < firstResponseTime) {
-                             firstResponseTime = commentTime;
-                             leadReviewer = comment.author?.displayName || "Unknown";
-                         }
-                     }
+                    if (comment.commentType !== CommentType.System) {
+                        const commentTime = new Date(comment.publishedDate).getTime();
+                        if (commentTime < firstResponseTime) {
+                            firstResponseTime = commentTime;
+                            leadReviewer = comment.author?.displayName || "Unknown";
+                        }
+                    }
                 }
             }
         }
@@ -142,7 +142,7 @@ export async function run() {
         if (!orgUrl || !token || !repoId) {
             console.error("Missing environment variables: ADO_ORG_URL, ADO_PAT, ADO_REPO_ID");
             return; // Don't throw, just exit, as we might be running in a context where we want to generate mock data instead?
-                    // But this is the main script.
+            // But this is the main script.
             // process.exit(1);
         }
 
@@ -185,15 +185,15 @@ export async function run() {
         const csvWriter = createObjectCsvWriter({
             path: 'ado_detailed_health.csv',
             header: [
-                {id: 'PR_ID', title: 'PR_ID'},
-                {id: 'Author', title: 'Author'},
-                {id: 'Created_Date', title: 'Created_Date'},
-                {id: 'Month', title: 'Month'},
-                {id: 'Status', title: 'Status'},
-                {id: 'Human_Comment_Count', title: 'Human_Comment_Count'},
-                {id: 'Hours_to_Merge', title: 'Hours_to_Merge'},
-                {id: 'Lead_Reviewer', title: 'Lead_Reviewer'},
-                {id: 'Reviewer_Response_Hours', title: 'Reviewer_Response_Hours'}
+                { id: 'PR_ID', title: 'PR_ID' },
+                { id: 'Author', title: 'Author' },
+                { id: 'Created_Date', title: 'Created_Date' },
+                { id: 'Month', title: 'Month' },
+                { id: 'Status', title: 'Status' },
+                { id: 'Human_Comment_Count', title: 'Human_Comment_Count' },
+                { id: 'Hours_to_Merge', title: 'Hours_to_Merge' },
+                { id: 'Lead_Reviewer', title: 'Lead_Reviewer' },
+                { id: 'Reviewer_Response_Hours', title: 'Reviewer_Response_Hours' }
             ]
         });
 
