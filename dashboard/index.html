@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADO Health Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 text-gray-800">Project Health Dashboard</h1>
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-500 text-sm font-medium">Avg Reviewer Response (Hrs)</h3>
+                <p class="text-3xl font-bold text-blue-600" id="avgResponse">Loading...</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-500 text-sm font-medium">Avg Time to Merge (Hrs)</h3>
+                <p class="text-3xl font-bold text-green-600" id="avgMerge">Loading...</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-gray-500 text-sm font-medium">Total PRs Analyzed</h3>
+                <p class="text-3xl font-bold text-purple-600" id="totalPRs">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">PRs by Author</h3>
+                <canvas id="authorChart"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">Reviewer Response Time Distribution</h3>
+                <canvas id="responseChart"></canvas>
+            </div>
+        </div>
+
+         <!-- Charts Row 2 -->
+         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">PR Status Breakdown</h3>
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <div class="p-6 border-b">
+                <h3 class="text-lg font-semibold">Detailed Data</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PR ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Response (Hrs)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Merge (Hrs)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
+                        <!-- Rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        Papa.parse('../ado_detailed_health.csv', {
+            download: true,
+            header: true,
+            complete: function(results) {
+                const data = results.data.filter(row => row.PR_ID); // Filter empty rows
+                processData(data);
+            },
+            error: function(err) {
+                console.error("Error parsing CSV:", err);
+                alert("Failed to load CSV data. Make sure 'ado_detailed_health.csv' exists in the root.");
+            }
+        });
+
+        function processData(data) {
+            // Calculate KPIs
+            const totalPRs = data.length;
+
+            const mergeTimes = data
+                .map(r => parseFloat(r.Hours_to_Merge))
+                .filter(n => !isNaN(n));
+            const avgMerge = mergeTimes.reduce((a, b) => a + b, 0) / mergeTimes.length || 0;
+
+            const responseTimes = data
+                .map(r => parseFloat(r.Reviewer_Response_Hours))
+                .filter(n => !isNaN(n));
+            const avgResponse = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length || 0;
+
+            document.getElementById('totalPRs').textContent = totalPRs;
+            document.getElementById('avgMerge').textContent = avgMerge.toFixed(1);
+            document.getElementById('avgResponse').textContent = avgResponse.toFixed(1);
+
+            // PRs by Author Chart
+            const authorCounts = {};
+            data.forEach(r => {
+                authorCounts[r.Author] = (authorCounts[r.Author] || 0) + 1;
+            });
+
+            new Chart(document.getElementById('authorChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(authorCounts),
+                    datasets: [{
+                        label: 'Number of PRs',
+                        data: Object.values(authorCounts),
+                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1
+                    }]
+                }
+            });
+
+             // Reviewer Response Chart (Histogram-ish)
+             const responseBins = ['< 1h', '1-4h', '4-12h', '12-24h', '> 24h'];
+             const responseCounts = [0, 0, 0, 0, 0];
+
+             responseTimes.forEach(t => {
+                 if (t < 1) responseCounts[0]++;
+                 else if (t < 4) responseCounts[1]++;
+                 else if (t < 12) responseCounts[2]++;
+                 else if (t < 24) responseCounts[3]++;
+                 else responseCounts[4]++;
+             });
+
+             new Chart(document.getElementById('responseChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: responseBins,
+                    datasets: [{
+                        data: responseCounts,
+                         backgroundColor: [
+                            'rgb(34, 197, 94)',
+                            'rgb(132, 204, 22)',
+                            'rgb(234, 179, 8)',
+                            'rgb(249, 115, 22)',
+                            'rgb(239, 68, 68)'
+                        ]
+                    }]
+                }
+            });
+
+            // Status Chart
+            const statusCounts = {};
+            data.forEach(r => {
+                 statusCounts[r.Status] = (statusCounts[r.Status] || 0) + 1;
+            });
+
+            new Chart(document.getElementById('statusChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: [
+                            'rgb(34, 197, 94)', // Completed
+                            'rgb(59, 130, 246)', // Active
+                             'rgb(156, 163, 175)', // Abandoned (Gray)
+                        ]
+                    }]
+                }
+            });
+
+            // Populate Table (First 10 rows)
+            const tableBody = document.getElementById('tableBody');
+            data.slice(0, 50).forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.PR_ID}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Author}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(row.Status)}">
+                            ${row.Status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Created_Date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Reviewer_Response_Hours}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Hours_to_Merge}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function getStatusColor(status) {
+            if (status === 'Completed') return 'bg-green-100 text-green-800';
+            if (status === 'Active') return 'bg-blue-100 text-blue-800';
+            if (status === 'Abandoned') return 'bg-gray-100 text-gray-800';
+            return 'bg-gray-100 text-gray-800';
+        }
+    </script>
+</body>
+</html>
