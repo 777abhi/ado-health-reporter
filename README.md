@@ -4,11 +4,41 @@ This project provides a comprehensive project health report for Azure Repos by a
 
 ## Features
 
+### Core Analysis
 *   **Engagement Filtering**: Extracts human-only comments (excluding system updates) to gauge genuine team interaction.
 *   **Reviewer Performance**: Calculates "Response Time" (time from PR creation to first non-author comment/vote) to identify bottlenecks.
-*   **Data Mapping**: Links PR authors to engagement levels and merge speeds.
-*   **CSV Export**: Generates `ado_detailed_health.csv` for further analysis.
-*   **Visual Dashboard**: A standalone HTML dashboard to visualize KPIs, charts, and detailed data.
+*   **Merge Velocity**: Tracks "Hours to Merge" for completed PRs to help with sprint planning.
+*   **Data Mapping**: Links PR authors to engagement levels, merge speeds, and status.
+
+### Utilities & Tools
+*   **Automated Data Extraction**: Fetches PR data directly from Azure DevOps using the API.
+*   **CSV Export**: Generates `ado_detailed_health.csv` containing raw data for further analysis.
+*   **Repository Discovery**: Includes a utility script (`list-repos.ts`) to list all available repositories within your ADO organization and project.
+*   **Mock Data Generator**: Capability to generate realistic mock data (`generate-mock-data.ts`) for testing and demonstrating the dashboard without an active ADO connection.
+*   **Visual Dashboard**: A standalone HTML dashboard (`dashboard/index.html`) to visualize KPIs, charts (Author distribution, Response Time, Status), and detailed data.
+
+## Future Roadmap (Planned Extensions)
+
+1.  **Date Range Filtering**: Allow users to specify a start and end date for the report generation.
+2.  **Team-Based Analysis**: Group authors and reviewers by teams defined in a config file.
+3.  **PR Size Metrics**: Include lines of code added/deleted in the CSV report.
+4.  **Review Depth Metric**: Calculate average length of comments or number of iterations (threads requiring re-work).
+5.  **Weekend/Off-Hours Activity**: Flag PRs created or reviewed during weekends or outside standard hours.
+6.  **Stale PR Detection**: Identify PRs that have been open and inactive for X days.
+7.  **Self-Review Detection**: Flag PRs where the author approved their own PR (if policy allows) or where there are zero comments/reviews before merge.
+8.  **Automated Email Reports**: Send the summary report via email after generation.
+9.  **Integration with Slack/Teams**: Post a summary of the health report to a chat channel.
+10. **Multi-Repo Aggregation**: Allow configuring multiple repo IDs to generate a combined report.
+11. **Exclude/Include Patterns**: Filter PRs based on branch names (e.g., exclude `release/*` or include only `main`).
+12. **Reviewer Load Balancing**: Analyze how many active PRs each reviewer has assigned simultaneously.
+13. **Comment Sentiment Analysis**: (Advanced) Use a simple sentiment score for comments to gauge tone.
+14. **Time to First Approval**: Metric for how long it takes to get the first approval vote.
+15. **Cross-Team Collaboration**: If teams are defined, measure how often one team reviews another's code.
+16. **Hotspot Analysis**: Identify files or folders that appear most frequently in PRs (requires file-level data).
+17. **Bug Linkage Rate**: Percentage of PRs linked to a work item (bug/user story).
+18. **Revert Rate Detection**: Identify PRs that revert previous commits or are themselves reverted.
+19. **CLI Interactive Mode**: A wizard-style CLI to set up the `.env` file.
+20. **Export to JSON/HTML**: Option to export the data directly to JSON or a static HTML file (pre-filled) instead of just CSV.
 
 ## Metrics Explained
 
@@ -47,6 +77,14 @@ This project provides a comprehensive project health report for Azure Repos by a
     ```
 
 ## Usage
+
+### Listing Repositories
+
+To find the Repository ID for your project:
+
+```bash
+npx ts-node src/list-repos.ts
+```
 
 ### Generating the Report
 
