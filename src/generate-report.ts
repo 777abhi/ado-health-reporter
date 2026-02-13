@@ -24,9 +24,11 @@ export async function getAdoConnection(orgUrl: string, token: string): Promise<a
     return connection;
 }
 
-export async function fetchPullRequests(gitApi: GitApi.IGitApi, repoId: string, top: number = 100): Promise<GitPullRequest[]> {
+export async function fetchPullRequests(gitApi: GitApi.IGitApi, repoId: string, top: number = 100, startDate?: Date, endDate?: Date): Promise<GitPullRequest[]> {
     const criteria: GitPullRequestSearchCriteria = {
-        status: PullRequestStatus.All
+        status: PullRequestStatus.All,
+        minTime: startDate,
+        maxTime: endDate
     };
     return await gitApi.getPullRequests(repoId, criteria, undefined, undefined, 0, top);
 }
@@ -146,12 +148,43 @@ export async function run() {
             // process.exit(1);
         }
 
+        // Parse Date Filter
+        let startDate: Date | undefined;
+        let endDate: Date | undefined;
+
+        // Env vars
+        if (process.env.START_DATE) startDate = new Date(process.env.START_DATE);
+        if (process.env.END_DATE) endDate = new Date(process.env.END_DATE);
+
+        // CLI args
+        const args = process.argv.slice(2);
+        for (let i = 0; i < args.length; i++) {
+            if (args[i] === '--start' && args[i + 1]) {
+                startDate = new Date(args[i + 1]);
+            }
+            if (args[i] === '--end' && args[i + 1]) {
+                endDate = new Date(args[i + 1]);
+            }
+        }
+
+        if (startDate && isNaN(startDate.getTime())) {
+            console.error("Invalid Start Date");
+            return;
+        }
+        if (endDate && isNaN(endDate.getTime())) {
+            console.error("Invalid End Date");
+            return;
+        }
+
+        if (startDate) console.log(`Filter Start Date: ${startDate.toISOString()}`);
+        if (endDate) console.log(`Filter End Date: ${endDate.toISOString()}`);
+
         console.log(`Connecting to ${orgUrl}...`);
         const connection = await getAdoConnection(orgUrl, token);
         const gitApi = await connection.getGitApi();
 
         console.log(`Fetching PRs for repo ${repoId}...`);
-        const prs = await fetchPullRequests(gitApi, repoId);
+        const prs = await fetchPullRequests(gitApi, repoId, 100, startDate, endDate);
         console.log(`Found ${prs.length} PRs.`);
 
         const records: HealthReportRow[] = [];

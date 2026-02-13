@@ -12,6 +12,7 @@ This project provides a comprehensive project health report for Azure Repos by a
 
 ### Utilities & Tools
 *   **Automated Data Extraction**: Fetches PR data directly from Azure DevOps using the API.
+*   **Date Range Filtering**: Analyze PRs within a specific timeframe using command-line arguments or environment variables.
 *   **CSV Export**: Generates `ado_detailed_health.csv` containing raw data for further analysis.
 *   **Repository Discovery**: Includes a utility script (`list-repos.ts`) to list all available repositories within your ADO organization and project.
 *   **Mock Data Generator**: Capability to generate realistic mock data (`generate-mock-data.ts`) for testing and demonstrating the dashboard without an active ADO connection.
@@ -19,8 +20,7 @@ This project provides a comprehensive project health report for Azure Repos by a
 
 ## Future Roadmap (Planned Extensions)
 
-1.  **Date Range Filtering**: Allow users to specify a start and end date for the report generation.
-2.  **Team-Based Analysis**: Group authors and reviewers by teams defined in a config file.
+1.  **Team-Based Analysis**: Group authors and reviewers by teams defined in a config file.
 3.  **PR Size Metrics**: Include lines of code added/deleted in the CSV report.
 4.  **Review Depth Metric**: Calculate average length of comments or number of iterations (threads requiring re-work).
 5.  **Weekend/Off-Hours Activity**: Flag PRs created or reviewed during weekends or outside standard hours.
@@ -95,6 +95,23 @@ npx ts-node src/generate-report.ts
 ```
 
 This will create `ado_detailed_health.csv` in the root directory.
+
+### Date Range Filtering
+
+You can filter PRs by creation date using command-line arguments:
+
+```bash
+# Filter by start date
+npx ts-node src/generate-report.ts --start 2023-01-01
+
+# Filter by end date
+npx ts-node src/generate-report.ts --end 2023-01-31
+
+# Filter by range
+npx ts-node src/generate-report.ts --start 2023-01-01 --end 2023-01-31
+```
+
+Alternatively, you can set `START_DATE` and `END_DATE` in your `.env` file or environment variables.
 
 ### Generating Mock Data (For Testing)
 
