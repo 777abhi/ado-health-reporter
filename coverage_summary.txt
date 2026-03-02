@@ -1,0 +1,34 @@
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS src/generate-report.test.ts (5.651 s)
+  Utility Functions in generate-report.ts
+    countHumanComments
+      ✓ should correctly count human comments, ignoring system and deleted comments (4 ms)
+      ✓ should return 0 when there are no comments (1 ms)
+    calculateHoursToMerge
+      ✓ should correctly calculate the hours difference between creation and closed date for completed PRs (1 ms)
+      ✓ should return "N/A" if PR is not completed
+      ✓ should return "N/A" if closedDate is missing (1 ms)
+      ✓ should return "N/A" if creationDate is missing (1 ms)
+    calculateReviewerResponse
+      ✓ should identify lead reviewer and response hours accurately for a single valid response (2 ms)
+      ✓ should ignore author's own comments (1 ms)
+      ✓ should ignore system comments (1 ms)
+      ✓ should handle the case where multiple reviewers comment, picking the first one (1 ms)
+      ✓ should return "N/A" if there are no valid reviewer comments (1 ms)
+      ✓ should return "N/A" if PR has no creation date
+
+--------------------|---------|----------|---------|---------|-------------------------------
+File                | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+--------------------|---------|----------|---------|---------|-------------------------------
+All files           |   43.26 |    37.68 |   42.85 |   45.91 |
+ generate-report.ts |   43.26 |    37.68 |   42.85 |   45.91 | 22-24,28-33,37,75,138-237,243
+--------------------|---------|----------|---------|---------|-------------------------------
+Test Suites: 1 passed, 1 total
+Tests:       12 passed, 12 total
+Snapshots:   0 total
+Time:        6.385 s
+Ran all test suites.
