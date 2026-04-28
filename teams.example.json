@@ -1,0 +1,14 @@
+{
+  "Frontend Team": [
+    "frontend.dev1@example.com",
+    "frontend.dev2@example.com",
+    "Alice Smith"
+  ],
+  "Backend Team": [
+    "backend.dev1@example.com",
+    "Bob Jones"
+  ],
+  "Platform Team": [
+    "platform.engineer@example.com"
+  ]
+}

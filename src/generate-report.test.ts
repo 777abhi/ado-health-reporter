@@ -96,7 +96,7 @@ describe('Utility Functions in generate-report.ts', () => {
       ];
 
       const result = calculateReviewerResponse(pr, threads);
-      expect(result).toEqual({ leadReviewer: 'Reviewer Name', responseHours: "1.00" });
+      expect(result).toEqual({ leadReviewer: 'Reviewer Name', leadReviewerUniqueName: 'reviewer@domain.com', responseHours: "1.00" });
     });
 
     it('should ignore author\'s own comments', () => {
@@ -123,7 +123,7 @@ describe('Utility Functions in generate-report.ts', () => {
       ];
 
       const result = calculateReviewerResponse(pr, threads);
-      expect(result).toEqual({ leadReviewer: 'Reviewer Name', responseHours: "2.00" });
+      expect(result).toEqual({ leadReviewer: 'Reviewer Name', leadReviewerUniqueName: 'reviewer@domain.com', responseHours: "2.00" });
     });
 
     it('should ignore system comments', () => {
@@ -150,7 +150,7 @@ describe('Utility Functions in generate-report.ts', () => {
       ];
 
       const result = calculateReviewerResponse(pr, threads);
-      expect(result).toEqual({ leadReviewer: 'Reviewer Name', responseHours: "1.50" });
+      expect(result).toEqual({ leadReviewer: 'Reviewer Name', leadReviewerUniqueName: 'reviewer@domain.com', responseHours: "1.50" });
     });
 
     it('should handle the case where multiple reviewers comment, picking the first one', () => {
@@ -181,7 +181,7 @@ describe('Utility Functions in generate-report.ts', () => {
       ];
 
       const result = calculateReviewerResponse(pr, threads);
-      expect(result).toEqual({ leadReviewer: 'Reviewer One', responseHours: "1.00" });
+      expect(result).toEqual({ leadReviewer: 'Reviewer One', leadReviewerUniqueName: 'reviewer1@domain.com', responseHours: "1.00" });
     });
 
     it('should return "N/A" if there are no valid reviewer comments', () => {
@@ -203,7 +203,7 @@ describe('Utility Functions in generate-report.ts', () => {
       ];
 
       const result = calculateReviewerResponse(pr, threads);
-      expect(result).toEqual({ leadReviewer: "N/A", responseHours: "N/A" });
+      expect(result).toEqual({ leadReviewer: "N/A", leadReviewerUniqueName: "N/A", responseHours: "N/A" });
     });
 
     it('should return "N/A" if PR has no creation date', () => {
@@ -224,7 +224,7 @@ describe('Utility Functions in generate-report.ts', () => {
       ];
 
       const result = calculateReviewerResponse(pr, threads);
-      expect(result).toEqual({ leadReviewer: "N/A", responseHours: "N/A" });
+      expect(result).toEqual({ leadReviewer: "N/A", leadReviewerUniqueName: "N/A", responseHours: "N/A" });
     });
   });
 });
