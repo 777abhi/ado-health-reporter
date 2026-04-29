@@ -5,6 +5,7 @@ This project provides a comprehensive project health report for Azure Repos by a
 ## Features
 
 ### Core Analysis
+*   **Team-Based Analysis**: Group authors and reviewers by teams defined in a `teams.json` config file to better understand team collaboration.
 *   **Engagement Filtering**: Extracts human-only comments (excluding system updates) to gauge genuine team interaction.
 *   **Reviewer Performance**: Calculates "Response Time" (time from PR creation to first non-author comment/vote) to identify bottlenecks.
 *   **Merge Velocity**: Tracks "Hours to Merge" for completed PRs to help with sprint planning.
@@ -16,11 +17,10 @@ This project provides a comprehensive project health report for Azure Repos by a
 *   **CSV Export**: Generates `ado_detailed_health.csv` containing raw data for further analysis.
 *   **Repository Discovery**: Includes a utility script (`list-repos.ts`) to list all available repositories within your ADO organization and project.
 *   **Mock Data Generator**: Capability to generate realistic mock data (`generate-mock-data.ts`) for testing and demonstrating the dashboard without an active ADO connection.
-*   **Visual Dashboard**: A standalone HTML dashboard (`dashboard/index.html`) to visualize KPIs, charts (Author distribution, Response Time, Status), and detailed data.
+*   **Visual Dashboard**: A standalone HTML dashboard (`dashboard/index.html`) to visualize KPIs, charts (Author distribution, Team distribution, Response Time, Status), and detailed data.
 
 ## Future Roadmap (Planned Extensions)
 
-1.  **Team-Based Analysis**: Group authors and reviewers by teams defined in a config file.
 3.  **PR Size Metrics**: Include lines of code added/deleted in the CSV report.
 4.  **Review Depth Metric**: Calculate average length of comments or number of iterations (threads requiring re-work).
 5.  **Weekend/Off-Hours Activity**: Flag PRs created or reviewed during weekends or outside standard hours.
@@ -95,6 +95,19 @@ npx ts-node src/generate-report.ts
 ```
 
 This will create `ado_detailed_health.csv` in the root directory.
+
+### Team Configuration (Optional)
+
+You can assign authors and reviewers to specific teams by creating a `teams.json` file in the root directory.
+
+```json
+{
+  "Team Alpha": ["user1@domain.com", "User Two Display Name"],
+  "Team Beta": ["user3@domain.com"]
+}
+```
+
+The tool will try to match either the Display Name or Unique Name against the arrays provided for each team.
 
 ### Date Range Filtering
 

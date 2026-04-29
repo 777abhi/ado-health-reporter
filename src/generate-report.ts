@@ -3,19 +3,47 @@ import * as GitApi from "azure-devops-node-api/GitApi";
 import { GitPullRequest, GitPullRequestSearchCriteria, PullRequestStatus, GitPullRequestCommentThread, CommentType, IdentityRefWithVote } from "azure-devops-node-api/interfaces/GitInterfaces";
 import * as dotenv from "dotenv";
 import { createObjectCsvWriter } from "csv-writer";
+import * as fs from "fs";
+import * as path from "path";
 
 dotenv.config();
 
 export interface HealthReportRow {
     PR_ID: number;
     Author: string;
+    Author_Team: string;
     Created_Date: string;
     Month: string;
     Status: string;
     Human_Comment_Count: number;
     Hours_to_Merge: string; // Using string to allow "N/A" or formatted hours
     Lead_Reviewer: string;
+    Reviewer_Team: string;
     Reviewer_Response_Hours: string; // Using string to allow "N/A" or formatted hours
+}
+
+export function loadTeamsConfig(): Record<string, string[]> {
+    const teamsPath = path.resolve(process.cwd(), 'teams.json');
+    if (fs.existsSync(teamsPath)) {
+        try {
+            const data = fs.readFileSync(teamsPath, 'utf-8');
+            return JSON.parse(data);
+        } catch (err) {
+            console.error("Error reading teams.json:", err);
+            return {};
+        }
+    }
+    return {};
+}
+
+export function getTeamForUser(identifier: string | undefined, teamsMap: Record<string, string[]>): string {
+    if (!identifier) return "Unknown";
+    for (const [teamName, members] of Object.entries(teamsMap)) {
+        if (members.some(member => member.toLowerCase() === identifier.toLowerCase())) {
+            return teamName;
+        }
+    }
+    return "Unknown";
 }
 
 export async function getAdoConnection(orgUrl: string, token: string): Promise<azdev.WebApi> {
@@ -61,14 +89,15 @@ export function calculateHoursToMerge(pr: GitPullRequest): string {
     return diffHours.toFixed(2);
 }
 
-export function calculateReviewerResponse(pr: GitPullRequest, threads: GitPullRequestCommentThread[]): { leadReviewer: string, responseHours: string } {
+export function calculateReviewerResponse(pr: GitPullRequest, threads: GitPullRequestCommentThread[]): { leadReviewer: string, leadReviewerUniqueName: string, responseHours: string } {
     if (!pr.creationDate) {
-        return { leadReviewer: "N/A", responseHours: "N/A" };
+        return { leadReviewer: "N/A", leadReviewerUniqueName: "N/A", responseHours: "N/A" };
     }
 
     const createdTime = new Date(pr.creationDate).getTime();
     let firstResponseTime = Infinity;
     let leadReviewer = "N/A";
+    let leadReviewerUniqueName = "N/A";
 
     // Check votes
     if (pr.reviewers) {
@@ -113,6 +142,7 @@ export function calculateReviewerResponse(pr: GitPullRequest, threads: GitPullRe
                         if (commentTime < firstResponseTime) {
                             firstResponseTime = commentTime;
                             leadReviewer = comment.author?.displayName || "Unknown";
+                            leadReviewerUniqueName = comment.author?.uniqueName || "Unknown";
                         }
                     }
                 }
@@ -126,11 +156,11 @@ export function calculateReviewerResponse(pr: GitPullRequest, threads: GitPullRe
     // However, I should check if `pr.reviewers` has something useful. `IdentityRefWithVote` has `votedFor`? No timestamp.
 
     if (firstResponseTime === Infinity) {
-        return { leadReviewer: "N/A", responseHours: "N/A" };
+        return { leadReviewer: "N/A", leadReviewerUniqueName: "N/A", responseHours: "N/A" };
     }
 
     const diffHours = (firstResponseTime - createdTime) / (1000 * 60 * 60);
-    return { leadReviewer, responseHours: diffHours.toFixed(2) };
+    return { leadReviewer, leadReviewerUniqueName, responseHours: diffHours.toFixed(2) };
 }
 
 
@@ -187,6 +217,7 @@ export async function run() {
         const prs = await fetchPullRequests(gitApi, repoId, 100, startDate, endDate);
         console.log(`Found ${prs.length} PRs.`);
 
+        const teamsMap = loadTeamsConfig();
         const records: HealthReportRow[] = [];
 
         for (const pr of prs) {
@@ -196,8 +227,14 @@ export async function run() {
             const threads = await fetchPrThreads(gitApi, repoId, pr.pullRequestId);
 
             const humanCommentCount = countHumanComments(threads);
-            const { leadReviewer, responseHours } = calculateReviewerResponse(pr, threads);
+            const { leadReviewer, leadReviewerUniqueName, responseHours } = calculateReviewerResponse(pr, threads);
             const hoursToMerge = calculateHoursToMerge(pr);
+
+            const authorIdentifier = pr.createdBy?.uniqueName || pr.createdBy?.displayName;
+            const authorTeam = getTeamForUser(authorIdentifier, teamsMap);
+
+            const reviewerIdentifier = leadReviewerUniqueName !== "N/A" ? leadReviewerUniqueName : leadReviewer;
+            const reviewerTeam = leadReviewer !== "N/A" ? getTeamForUser(reviewerIdentifier, teamsMap) : "N/A";
 
             const createdDate = pr.creationDate ? new Date(pr.creationDate) : new Date();
             const month = createdDate.toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -205,12 +242,14 @@ export async function run() {
             records.push({
                 PR_ID: pr.pullRequestId,
                 Author: pr.createdBy?.displayName || "Unknown",
+                Author_Team: authorTeam,
                 Created_Date: createdDate.toISOString().split('T')[0],
                 Month: month,
                 Status: PullRequestStatus[pr.status || 0], // Map enum to string
                 Human_Comment_Count: humanCommentCount,
                 Hours_to_Merge: hoursToMerge,
                 Lead_Reviewer: leadReviewer,
+                Reviewer_Team: reviewerTeam,
                 Reviewer_Response_Hours: responseHours
             });
         }
@@ -220,12 +259,14 @@ export async function run() {
             header: [
                 { id: 'PR_ID', title: 'PR_ID' },
                 { id: 'Author', title: 'Author' },
+                { id: 'Author_Team', title: 'Author_Team' },
                 { id: 'Created_Date', title: 'Created_Date' },
                 { id: 'Month', title: 'Month' },
                 { id: 'Status', title: 'Status' },
                 { id: 'Human_Comment_Count', title: 'Human_Comment_Count' },
                 { id: 'Hours_to_Merge', title: 'Hours_to_Merge' },
                 { id: 'Lead_Reviewer', title: 'Lead_Reviewer' },
+                { id: 'Reviewer_Team', title: 'Reviewer_Team' },
                 { id: 'Reviewer_Response_Hours', title: 'Reviewer_Response_Hours' }
             ]
         });

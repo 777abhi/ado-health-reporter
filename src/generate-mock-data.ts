@@ -5,6 +5,21 @@ const authors = ["Alice", "Bob", "Charlie", "David", "Eve"];
 const reviewers = ["Frank", "Grace", "Heidi", "Ivan", "Judy"];
 const statuses = ["Completed", "Active", "Abandoned"];
 
+const mockTeamsMap: Record<string, string[]> = {
+    "Team Alpha": ["Alice", "Bob", "Frank", "Grace"],
+    "Team Beta": ["Charlie", "David", "Heidi", "Ivan"],
+    "Team Gamma": ["Eve", "Judy"]
+};
+
+function getTeamForMockUser(name: string): string {
+    for (const [teamName, members] of Object.entries(mockTeamsMap)) {
+        if (members.includes(name)) {
+            return teamName;
+        }
+    }
+    return "Unknown";
+}
+
 function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -35,15 +50,19 @@ async function generateMockData() {
             leadReviewer = getRandomItem(reviewers);
         }
 
+        const author = getRandomItem(authors);
+
         records.push({
             PR_ID: 1000 + i,
-            Author: getRandomItem(authors),
+            Author: author,
+            Author_Team: getTeamForMockUser(author),
             Created_Date: createdDate.toISOString().split('T')[0],
             Month: month,
             Status: status,
             Human_Comment_Count: getRandomInt(0, 15),
             Hours_to_Merge: hoursToMerge,
             Lead_Reviewer: leadReviewer,
+            Reviewer_Team: leadReviewer !== "N/A" ? getTeamForMockUser(leadReviewer) : "N/A",
             Reviewer_Response_Hours: reviewerResponseHours
         });
     }
@@ -53,12 +72,14 @@ async function generateMockData() {
         header: [
             {id: 'PR_ID', title: 'PR_ID'},
             {id: 'Author', title: 'Author'},
+            {id: 'Author_Team', title: 'Author_Team'},
             {id: 'Created_Date', title: 'Created_Date'},
             {id: 'Month', title: 'Month'},
             {id: 'Status', title: 'Status'},
             {id: 'Human_Comment_Count', title: 'Human_Comment_Count'},
             {id: 'Hours_to_Merge', title: 'Hours_to_Merge'},
             {id: 'Lead_Reviewer', title: 'Lead_Reviewer'},
+            {id: 'Reviewer_Team', title: 'Reviewer_Team'},
             {id: 'Reviewer_Response_Hours', title: 'Reviewer_Response_Hours'}
         ]
     });

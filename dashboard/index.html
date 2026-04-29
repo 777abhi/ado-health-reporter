@@ -46,6 +46,10 @@
                 <h3 class="text-lg font-semibold mb-4">PR Status Breakdown</h3>
                 <canvas id="statusChart"></canvas>
             </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <h3 class="text-lg font-semibold mb-4">PRs by Team</h3>
+                <canvas id="teamChart"></canvas>
+            </div>
         </div>
 
         <!-- Data Table -->
@@ -59,8 +63,10 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PR ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author Team</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reviewer Team</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Response (Hrs)</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Merge (Hrs)</th>
                         </tr>
@@ -175,6 +181,26 @@
                 }
             });
 
+            // Team Chart
+            const teamCounts = {};
+            data.forEach(r => {
+                 teamCounts[r.Author_Team] = (teamCounts[r.Author_Team] || 0) + 1;
+            });
+
+            new Chart(document.getElementById('teamChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(teamCounts),
+                    datasets: [{
+                        label: 'Number of PRs',
+                        data: Object.values(teamCounts),
+                        backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                        borderColor: 'rgb(16, 185, 129)',
+                        borderWidth: 1
+                    }]
+                }
+            });
+
             // Populate Table (First 10 rows)
             const tableBody = document.getElementById('tableBody');
             data.slice(0, 50).forEach(row => {
@@ -182,12 +208,14 @@
                 tr.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.PR_ID}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Author}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Author_Team || 'Unknown'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(row.Status)}">
                             ${row.Status}
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Created_Date}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Reviewer_Team || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Reviewer_Response_Hours}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Hours_to_Merge}</td>
                 `;
