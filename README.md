@@ -158,3 +158,7 @@ npx ts-node src/generate-mock-data.ts
 *   **Spot Burnout**: Look for high `Reviewer_Response_Hours` + high volume of PRs for specific reviewers.
 *   **Identify Silent Merges**: Filter for `Human_Comment_Count = 0`. These are high-risk merges.
 *   **Optimize Planning**: Use the average `Hours_to_Merge` to better estimate feature delivery times.
+
+## Business Case & ROI
+
+For a detailed analysis of how engineering process observability benefits organizations working on Azure DevOps (and how to calculate your team's Return on Investment), see the [Business Case Analysis](docs/BUSINESS_CASE.md).
