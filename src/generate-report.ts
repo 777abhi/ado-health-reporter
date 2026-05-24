@@ -309,7 +309,6 @@ export async function run() {
                 console.error(`Error processing repository ${repo.name}:`, err.message || err);
             }
         }
-        }
 
         const csvWriter = createObjectCsvWriter({
             path: 'ado_detailed_health.csv',
