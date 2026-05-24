@@ -1,51 +1,81 @@
-PR_ID,Author,Author_Team,Created_Date,Month,Status,Human_Comment_Count,Hours_to_Merge,Lead_Reviewer,Reviewer_Team,Reviewer_Response_Hours
-1001,Charlie,Team Beta,2023-01-14,January 2023,Active,12,N/A,Ivan,Team Beta,45.32
-1002,Bob,Team Alpha,2025-02-27,February 2025,Completed,2,21.97,Judy,Team Gamma,29.76
-1003,Alice,Team Alpha,2025-03-07,March 2025,Abandoned,10,N/A,Grace,Team Alpha,22.67
-1004,Bob,Team Alpha,2026-01-13,January 2026,Active,11,N/A,N/A,N/A,N/A
-1005,Eve,Team Gamma,2024-02-21,February 2024,Completed,9,17.11,N/A,N/A,N/A
-1006,Alice,Team Alpha,2024-05-11,May 2024,Abandoned,0,N/A,Grace,Team Alpha,11.14
-1007,Bob,Team Alpha,2024-10-29,October 2024,Completed,9,21.94,Frank,Team Alpha,11.93
-1008,Eve,Team Gamma,2024-10-22,October 2024,Abandoned,14,N/A,Grace,Team Alpha,26.33
-1009,Charlie,Team Beta,2024-12-18,December 2024,Completed,3,20.23,Grace,Team Alpha,43.86
-1010,Alice,Team Alpha,2025-12-05,December 2025,Completed,11,79.72,N/A,N/A,N/A
-1011,Eve,Team Gamma,2025-05-05,May 2025,Active,7,N/A,N/A,N/A,N/A
-1012,Charlie,Team Beta,2023-07-15,July 2023,Active,9,N/A,Ivan,Team Beta,4.32
-1013,David,Team Beta,2024-02-19,February 2024,Completed,10,3.36,Ivan,Team Beta,32.75
-1014,Charlie,Team Beta,2025-12-18,December 2025,Active,4,N/A,Ivan,Team Beta,0.91
-1015,Alice,Team Alpha,2026-01-29,January 2026,Abandoned,8,N/A,Judy,Team Gamma,11.73
-1016,Bob,Team Alpha,2025-08-13,August 2025,Abandoned,3,N/A,Heidi,Team Beta,34.32
-1017,Bob,Team Alpha,2025-10-05,October 2025,Abandoned,14,N/A,Frank,Team Alpha,25.20
-1018,David,Team Beta,2025-09-02,September 2025,Active,8,N/A,Frank,Team Alpha,33.02
-1019,David,Team Beta,2025-01-09,January 2025,Abandoned,4,N/A,Ivan,Team Beta,42.38
-1020,Bob,Team Alpha,2024-01-14,January 2024,Active,12,N/A,Heidi,Team Beta,5.75
-1021,Eve,Team Gamma,2024-10-10,October 2024,Abandoned,12,N/A,Heidi,Team Beta,11.98
-1022,Bob,Team Alpha,2024-10-28,October 2024,Active,2,N/A,N/A,N/A,N/A
-1023,Eve,Team Gamma,2025-03-19,March 2025,Active,8,N/A,Judy,Team Gamma,3.94
-1024,Bob,Team Alpha,2024-09-17,September 2024,Completed,5,31.08,Frank,Team Alpha,17.99
-1025,Bob,Team Alpha,2023-01-29,January 2023,Completed,7,25.91,Ivan,Team Beta,20.31
-1026,Alice,Team Alpha,2023-09-26,September 2023,Completed,14,35.77,N/A,N/A,N/A
-1027,Alice,Team Alpha,2023-06-29,June 2023,Active,10,N/A,Ivan,Team Beta,10.49
-1028,Alice,Team Alpha,2024-04-28,April 2024,Completed,14,60.36,Frank,Team Alpha,41.70
-1029,Alice,Team Alpha,2024-09-29,September 2024,Completed,11,10.31,Judy,Team Gamma,38.48
-1030,Eve,Team Gamma,2023-02-28,February 2023,Completed,0,5.50,Frank,Team Alpha,36.52
-1031,David,Team Beta,2024-04-17,April 2024,Abandoned,13,N/A,Grace,Team Alpha,26.26
-1032,Bob,Team Alpha,2025-09-13,September 2025,Active,5,N/A,Judy,Team Gamma,16.97
-1033,David,Team Beta,2025-03-10,March 2025,Abandoned,6,N/A,N/A,N/A,N/A
-1034,Charlie,Team Beta,2025-03-04,March 2025,Completed,6,2.01,Heidi,Team Beta,36.34
-1035,Eve,Team Gamma,2024-11-16,November 2024,Completed,4,5.15,Judy,Team Gamma,15.06
-1036,David,Team Beta,2025-06-11,June 2025,Active,0,N/A,Frank,Team Alpha,30.16
-1037,Alice,Team Alpha,2023-04-06,April 2023,Active,14,N/A,Judy,Team Gamma,41.41
-1038,David,Team Beta,2025-04-27,April 2025,Active,2,N/A,N/A,N/A,N/A
-1039,Charlie,Team Beta,2024-06-19,June 2024,Completed,13,94.45,N/A,N/A,N/A
-1040,Charlie,Team Beta,2025-05-02,May 2025,Active,3,N/A,Ivan,Team Beta,27.10
-1041,Alice,Team Alpha,2023-06-28,June 2023,Active,10,N/A,Ivan,Team Beta,3.93
-1042,David,Team Beta,2024-03-28,March 2024,Completed,11,8.30,Heidi,Team Beta,13.79
-1043,Alice,Team Alpha,2024-11-29,November 2024,Abandoned,4,N/A,Heidi,Team Beta,21.68
-1044,Eve,Team Gamma,2024-04-17,April 2024,Abandoned,15,N/A,Ivan,Team Beta,8.32
-1045,Charlie,Team Beta,2025-04-24,April 2025,Abandoned,6,N/A,Ivan,Team Beta,30.12
-1046,Bob,Team Alpha,2023-11-15,November 2023,Active,0,N/A,Heidi,Team Beta,36.29
-1047,Charlie,Team Beta,2025-11-21,November 2025,Abandoned,7,N/A,Ivan,Team Beta,24.52
-1048,David,Team Beta,2025-09-09,September 2025,Completed,5,77.26,N/A,N/A,N/A
-1049,Eve,Team Gamma,2023-11-02,November 2023,Abandoned,13,N/A,Grace,Team Alpha,43.35
-1050,David,Team Beta,2023-12-11,December 2023,Abandoned,4,N/A,Ivan,Team Beta,6.07
+PR_ID,Repository,Author,Author_Team,Created_Date,Month,Status,Human_Comment_Count,Hours_to_Merge,Lead_Reviewer,Reviewer_Team,Reviewer_Response_Hours
+1001,web-frontend,Bob,Team Alpha,2026-05-02,May 2026,Completed,8,85.55,Frank,Team Alpha,15.25
+1002,infra-pipeline,Eve,Team Gamma,2026-05-11,May 2026,Active,3,N/A,Heidi,Team Beta,40.68
+1003,infra-pipeline,Bob,Team Alpha,2026-05-02,May 2026,Active,12,N/A,N/A,N/A,N/A
+1004,infra-pipeline,Alice,Team Alpha,2026-05-14,May 2026,Completed,5,64.27,Ivan,Team Beta,6.00
+1005,infra-pipeline,David,Team Beta,2026-04-27,April 2026,Abandoned,8,N/A,Frank,Team Alpha,37.69
+1006,infra-pipeline,Charlie,Team Beta,2026-05-20,May 2026,Active,2,N/A,Judy,Team Gamma,44.58
+1007,infra-pipeline,Alice,Team Alpha,2026-05-06,May 2026,Active,11,N/A,Ivan,Team Beta,37.43
+1008,core-api,Eve,Team Gamma,2026-05-18,May 2026,Active,2,N/A,Heidi,Team Beta,36.05
+1009,web-frontend,Charlie,Team Beta,2026-04-01,April 2026,Active,7,N/A,Ivan,Team Beta,6.60
+1010,core-api,Alice,Team Alpha,2026-04-29,April 2026,Completed,13,60.60,Heidi,Team Beta,5.59
+1011,web-frontend,Charlie,Team Beta,2026-04-11,April 2026,Abandoned,2,N/A,Heidi,Team Beta,2.03
+1012,infra-pipeline,Charlie,Team Beta,2026-04-07,April 2026,Abandoned,14,N/A,Frank,Team Alpha,45.80
+1013,infra-pipeline,Eve,Team Gamma,2026-05-16,May 2026,Active,8,N/A,Ivan,Team Beta,25.67
+1014,web-frontend,Charlie,Team Beta,2026-04-19,April 2026,Abandoned,12,N/A,Judy,Team Gamma,10.55
+1015,infra-pipeline,David,Team Beta,2026-03-28,March 2026,Abandoned,14,N/A,Grace,Team Alpha,21.33
+1016,web-frontend,Eve,Team Gamma,2026-05-16,May 2026,Active,4,N/A,Heidi,Team Beta,37.12
+1017,core-api,Charlie,Team Beta,2026-04-12,April 2026,Completed,9,30.23,N/A,N/A,N/A
+1018,core-api,Bob,Team Alpha,2026-04-26,April 2026,Abandoned,12,N/A,Heidi,Team Beta,40.03
+1019,core-api,Bob,Team Alpha,2026-04-25,April 2026,Abandoned,4,N/A,Heidi,Team Beta,3.44
+1020,infra-pipeline,Eve,Team Gamma,2026-04-20,April 2026,Completed,7,64.15,N/A,N/A,N/A
+1021,infra-pipeline,Charlie,Team Beta,2026-04-01,April 2026,Active,15,N/A,Frank,Team Alpha,18.99
+1022,core-api,Alice,Team Alpha,2026-05-19,May 2026,Active,7,N/A,Heidi,Team Beta,10.32
+1023,infra-pipeline,Bob,Team Alpha,2026-03-26,March 2026,Completed,8,54.02,N/A,N/A,N/A
+1024,infra-pipeline,Bob,Team Alpha,2026-05-05,May 2026,Active,8,N/A,Judy,Team Gamma,34.32
+1025,infra-pipeline,David,Team Beta,2026-04-10,April 2026,Abandoned,2,N/A,Heidi,Team Beta,12.87
+1026,core-api,Eve,Team Gamma,2026-03-31,March 2026,Completed,9,66.92,Judy,Team Gamma,6.04
+1027,core-api,David,Team Beta,2026-04-03,April 2026,Completed,3,5.28,Frank,Team Alpha,39.93
+1028,core-api,Eve,Team Gamma,2026-04-06,April 2026,Active,14,N/A,Frank,Team Alpha,18.61
+1029,infra-pipeline,Bob,Team Alpha,2026-05-21,May 2026,Active,13,N/A,Ivan,Team Beta,19.57
+1030,core-api,Charlie,Team Beta,2026-05-20,May 2026,Completed,7,97.82,Judy,Team Gamma,28.31
+1031,infra-pipeline,Bob,Team Alpha,2026-03-29,March 2026,Abandoned,12,N/A,Frank,Team Alpha,10.47
+1032,core-api,Bob,Team Alpha,2026-05-24,May 2026,Abandoned,1,N/A,Grace,Team Alpha,29.95
+1033,core-api,Charlie,Team Beta,2026-03-27,March 2026,Active,12,N/A,Judy,Team Gamma,34.73
+1034,core-api,David,Team Beta,2026-04-20,April 2026,Active,6,N/A,Grace,Team Alpha,17.83
+1035,infra-pipeline,David,Team Beta,2026-04-02,April 2026,Completed,7,69.68,Ivan,Team Beta,14.96
+1036,web-frontend,Eve,Team Gamma,2026-05-03,May 2026,Abandoned,11,N/A,Judy,Team Gamma,6.94
+1037,web-frontend,Charlie,Team Beta,2026-05-05,May 2026,Active,12,N/A,Grace,Team Alpha,44.18
+1038,infra-pipeline,Charlie,Team Beta,2026-04-21,April 2026,Abandoned,7,N/A,Heidi,Team Beta,45.52
+1039,core-api,Charlie,Team Beta,2026-05-22,May 2026,Active,1,N/A,Grace,Team Alpha,7.22
+1040,infra-pipeline,Bob,Team Alpha,2026-05-20,May 2026,Active,1,N/A,Frank,Team Alpha,6.68
+1041,infra-pipeline,David,Team Beta,2026-03-29,March 2026,Active,1,N/A,Ivan,Team Beta,33.04
+1042,web-frontend,David,Team Beta,2026-05-24,May 2026,Active,5,N/A,Grace,Team Alpha,3.55
+1043,infra-pipeline,Eve,Team Gamma,2026-04-06,April 2026,Abandoned,7,N/A,Ivan,Team Beta,4.29
+1044,core-api,Eve,Team Gamma,2026-05-14,May 2026,Active,3,N/A,Ivan,Team Beta,23.17
+1045,infra-pipeline,Charlie,Team Beta,2026-04-29,April 2026,Completed,14,17.19,Grace,Team Alpha,24.86
+1046,web-frontend,David,Team Beta,2026-04-30,May 2026,Completed,12,90.84,Grace,Team Alpha,43.21
+1047,infra-pipeline,Bob,Team Alpha,2026-05-02,May 2026,Completed,6,79.62,Grace,Team Alpha,34.55
+1048,web-frontend,Alice,Team Alpha,2026-03-26,March 2026,Completed,5,42.12,Frank,Team Alpha,28.75
+1049,infra-pipeline,Eve,Team Gamma,2026-03-27,March 2026,Completed,8,81.72,Grace,Team Alpha,0.43
+1050,core-api,David,Team Beta,2026-04-15,April 2026,Active,14,N/A,Frank,Team Alpha,38.43
+1051,web-frontend,David,Team Beta,2026-04-17,April 2026,Completed,11,11.08,Ivan,Team Beta,12.16
+1052,core-api,David,Team Beta,2026-04-26,April 2026,Completed,10,39.91,Frank,Team Alpha,9.24
+1053,core-api,Charlie,Team Beta,2026-04-12,April 2026,Completed,10,52.70,Grace,Team Alpha,31.35
+1054,core-api,Eve,Team Gamma,2026-05-06,May 2026,Completed,5,79.73,Judy,Team Gamma,8.14
+1055,web-frontend,Eve,Team Gamma,2026-05-24,May 2026,Active,9,N/A,Frank,Team Alpha,43.95
+1056,core-api,Charlie,Team Beta,2026-04-19,April 2026,Abandoned,0,N/A,Grace,Team Alpha,21.66
+1057,web-frontend,Bob,Team Alpha,2026-04-02,April 2026,Completed,10,40.38,Heidi,Team Beta,8.77
+1058,web-frontend,Eve,Team Gamma,2026-03-31,March 2026,Active,15,N/A,Heidi,Team Beta,33.22
+1059,infra-pipeline,Eve,Team Gamma,2026-05-05,May 2026,Completed,14,0.14,Judy,Team Gamma,16.93
+1060,web-frontend,Bob,Team Alpha,2026-04-25,April 2026,Active,14,N/A,Grace,Team Alpha,21.30
+1061,infra-pipeline,Eve,Team Gamma,2026-05-05,May 2026,Active,13,N/A,Grace,Team Alpha,8.32
+1062,core-api,Eve,Team Gamma,2026-04-20,April 2026,Abandoned,4,N/A,Heidi,Team Beta,41.61
+1063,infra-pipeline,Eve,Team Gamma,2026-05-08,May 2026,Abandoned,9,N/A,Frank,Team Alpha,43.24
+1064,core-api,Bob,Team Alpha,2026-04-09,April 2026,Completed,1,89.79,Frank,Team Alpha,39.35
+1065,infra-pipeline,Bob,Team Alpha,2026-04-04,April 2026,Active,0,N/A,Judy,Team Gamma,45.67
+1066,web-frontend,Bob,Team Alpha,2026-05-24,May 2026,Active,8,N/A,Frank,Team Alpha,44.46
+1067,infra-pipeline,David,Team Beta,2026-05-10,May 2026,Abandoned,7,N/A,N/A,N/A,N/A
+1068,infra-pipeline,David,Team Beta,2026-05-15,May 2026,Active,0,N/A,Heidi,Team Beta,32.84
+1069,infra-pipeline,Eve,Team Gamma,2026-04-08,April 2026,Completed,3,76.74,Judy,Team Gamma,21.76
+1070,core-api,Charlie,Team Beta,2026-04-22,April 2026,Abandoned,14,N/A,Grace,Team Alpha,18.96
+1071,infra-pipeline,David,Team Beta,2026-04-06,April 2026,Active,9,N/A,Grace,Team Alpha,38.84
+1072,web-frontend,David,Team Beta,2026-04-15,April 2026,Completed,2,63.42,Grace,Team Alpha,36.91
+1073,web-frontend,Alice,Team Alpha,2026-05-06,May 2026,Abandoned,14,N/A,Heidi,Team Beta,2.91
+1074,infra-pipeline,Eve,Team Gamma,2026-04-01,April 2026,Completed,12,41.39,Heidi,Team Beta,32.89
+1075,web-frontend,Bob,Team Alpha,2026-04-15,April 2026,Completed,14,88.82,Frank,Team Alpha,46.39
+1076,core-api,Charlie,Team Beta,2026-04-28,April 2026,Abandoned,5,N/A,Judy,Team Gamma,33.34
+1077,core-api,Charlie,Team Beta,2026-05-22,May 2026,Completed,4,58.58,Judy,Team Gamma,20.21
+1078,core-api,Alice,Team Alpha,2026-05-02,May 2026,Abandoned,14,N/A,Grace,Team Alpha,9.25
+1079,infra-pipeline,David,Team Beta,2026-04-16,April 2026,Abandoned,5,N/A,Judy,Team Gamma,10.16
+1080,core-api,Bob,Team Alpha,2026-05-14,May 2026,Abandoned,12,N/A,Heidi,Team Beta,14.39
