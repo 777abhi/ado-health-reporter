@@ -267,6 +267,12 @@
     </div>
 
     <script>
+        // Check for URL parameter to disable animations (useful for automated screenshots)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('animate') === 'false') {
+            Chart.defaults.animation = false;
+        }
+
         // Global variables to hold parsed data and active charts
         let rawData = [];
         let activeRepo = "ALL";

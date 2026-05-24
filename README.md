@@ -5,6 +5,7 @@ This project provides a comprehensive project health report for Azure Repos by a
 ## Features
 
 ### Core Analysis
+*   **Multi-Repository Comparison**: Analyze multiple repositories at once, comparing response/merge times and PR volume side-by-side on the dashboard.
 *   **Team-Based Analysis**: Group authors and reviewers by teams defined in a `teams.json` config file to better understand team collaboration.
 *   **Engagement Filtering**: Extracts human-only comments (excluding system updates) to gauge genuine team interaction.
 *   **Reviewer Performance**: Calculates "Response Time" (time from PR creation to first non-author comment/vote) to identify bottlenecks.
@@ -13,11 +14,12 @@ This project provides a comprehensive project health report for Azure Repos by a
 
 ### Utilities & Tools
 *   **Automated Data Extraction**: Fetches PR data directly from Azure DevOps using the API.
+*   **60-Day Default Window**: Defaults to fetching data from the last 60 days to keep metrics relevant and reduce older historical noise.
 *   **Date Range Filtering**: Analyze PRs within a specific timeframe using command-line arguments or environment variables.
 *   **CSV Export**: Generates `ado_detailed_health.csv` containing raw data for further analysis.
 *   **Repository Discovery**: Includes a utility script (`list-repos.ts`) to list all available repositories within your ADO organization and project.
 *   **Mock Data Generator**: Capability to generate realistic mock data (`generate-mock-data.ts`) for testing and demonstrating the dashboard without an active ADO connection.
-*   **Visual Dashboard**: A standalone HTML dashboard (`dashboard/index.html`) to visualize KPIs, charts (Author distribution, Team distribution, Response Time, Status), and detailed data.
+*   **Visual Dashboard**: A standalone HTML dashboard (`dashboard/index.html`) to visualize KPIs, charts (Author, Team, Repository Performance, PR Volume Distribution, Response Time, Status), and detailed data.
 
 ## Future Roadmap (Planned Extensions)
 
@@ -28,7 +30,6 @@ This project provides a comprehensive project health report for Azure Repos by a
 7.  **Self-Review Detection**: Flag PRs where the author approved their own PR (if policy allows) or where there are zero comments/reviews before merge.
 8.  **Automated Email Reports**: Send the summary report via email after generation.
 9.  **Integration with Slack/Teams**: Post a summary of the health report to a chat channel.
-10. **Multi-Repo Aggregation**: Allow configuring multiple repo IDs to generate a combined report.
 11. **Exclude/Include Patterns**: Filter PRs based on branch names (e.g., exclude `release/*` or include only `main`).
 12. **Reviewer Load Balancing**: Analyze how many active PRs each reviewer has assigned simultaneously.
 13. **Comment Sentiment Analysis**: (Advanced) Use a simple sentiment score for comments to gauge tone.
@@ -72,7 +73,7 @@ This project provides a comprehensive project health report for Azure Repos by a
     ```env
     ADO_ORG_URL=https://dev.azure.com/your-org
     ADO_PAT=your_personal_access_token
-    ADO_REPO_ID=your_repository_id_or_guid
+    ADO_REPO_ID=your_repository_id_or_guid # Accepts single repo, comma-separated list, or '*' for all repos
     ADO_PROJECT=your_project_name
     ```
 
@@ -111,7 +112,9 @@ The tool will try to match either the Display Name or Unique Name against the ar
 
 ### Date Range Filtering
 
-You can filter PRs by creation date using command-line arguments:
+By default, the report generator defaults to analyzing data from the **last 60 days** to focus metrics on active sprint cycles and reduce older noise.
+
+You can override this default and filter PRs by creation date using command-line arguments:
 
 ```bash
 # Filter by start date
