@@ -10,6 +10,7 @@ dotenv.config();
 
 export interface HealthReportRow {
     PR_ID: number;
+    Repository: string;
     Author: string;
     Author_Team: string;
     Created_Date: string;
@@ -52,7 +53,7 @@ export async function getAdoConnection(orgUrl: string, token: string): Promise<a
     return connection;
 }
 
-export async function fetchPullRequests(gitApi: GitApi.IGitApi, repoId: string, top: number = 100, startDate?: Date, endDate?: Date): Promise<GitPullRequest[]> {
+export async function fetchPullRequests(gitApi: GitApi.IGitApi, repoId: string, top: number = 200, startDate?: Date, endDate?: Date): Promise<GitPullRequest[]> {
     const criteria: GitPullRequestSearchCriteria = {
         status: PullRequestStatus.All,
         minTime: startDate,
@@ -164,18 +165,49 @@ export function calculateReviewerResponse(pr: GitPullRequest, threads: GitPullRe
 }
 
 
+export async function getTargetRepositories(
+    gitApi: GitApi.IGitApi,
+    projectFilter?: string,
+    repoFilter?: string
+): Promise<{ id: string; name: string }[]> {
+    const repos = await gitApi.getRepositories();
+    if (!repos) return [];
+
+    let filtered = repos;
+
+    // Filter by project if set and not placeholder
+    if (projectFilter && projectFilter !== "your_project_name" && projectFilter.trim() !== "") {
+        filtered = filtered.filter(repo => 
+            repo.project?.name?.toLowerCase() === projectFilter.toLowerCase() || 
+            repo.project?.id === projectFilter
+        );
+    }
+
+    // Filter by repo ID / Name if set and not placeholder or *
+    if (repoFilter && repoFilter !== "your_repository_id_or_guid" && repoFilter.trim() !== "" && repoFilter.trim() !== "*") {
+        const targets = repoFilter.split(",").map(r => r.trim().toLowerCase());
+        filtered = filtered.filter(repo => 
+            (repo.name && targets.includes(repo.name.toLowerCase())) ||
+            (repo.id && targets.includes(repo.id.toLowerCase()))
+        );
+    }
+
+    return filtered.map(repo => ({
+        id: repo.id || "",
+        name: repo.name || ""
+    })).filter(repo => repo.id !== "");
+}
+
 export async function run() {
     try {
         const orgUrl = process.env.ADO_ORG_URL;
         const token = process.env.ADO_PAT;
-        const repoId = process.env.ADO_REPO_ID;
-        const project = process.env.ADO_PROJECT; // Not strictly needed if repoId is GUID, but good if name.
+        const repoIdFilter = process.env.ADO_REPO_ID;
+        const project = process.env.ADO_PROJECT;
 
-        if (!orgUrl || !token || !repoId) {
-            console.error("Missing environment variables: ADO_ORG_URL, ADO_PAT, ADO_REPO_ID");
-            return; // Don't throw, just exit, as we might be running in a context where we want to generate mock data instead?
-            // But this is the main script.
-            // process.exit(1);
+        if (!orgUrl || !token) {
+            console.error("Missing environment variables: ADO_ORG_URL, ADO_PAT");
+            return;
         }
 
         // Parse Date Filter
@@ -197,6 +229,12 @@ export async function run() {
             }
         }
 
+        // If no start date is defined, default to 60 days ago
+        if (!startDate) {
+            startDate = new Date();
+            startDate.setDate(startDate.getDate() - 60);
+        }
+
         if (startDate && isNaN(startDate.getTime())) {
             console.error("Invalid Start Date");
             return;
@@ -213,51 +251,71 @@ export async function run() {
         const connection = await getAdoConnection(orgUrl, token);
         const gitApi = await connection.getGitApi();
 
-        console.log(`Fetching PRs for repo ${repoId}...`);
-        const prs = await fetchPullRequests(gitApi, repoId, 100, startDate, endDate);
-        console.log(`Found ${prs.length} PRs.`);
+        console.log("Resolving target repositories...");
+        const targetRepos = await getTargetRepositories(gitApi, project, repoIdFilter);
+
+        if (targetRepos.length === 0) {
+            console.error("No matching repositories found. Please check ADO_PROJECT and ADO_REPO_ID configurations.");
+            return;
+        }
+
+        console.log(`Found ${targetRepos.length} target repositories: ${targetRepos.map(r => r.name).join(", ")}`);
 
         const teamsMap = loadTeamsConfig();
         const records: HealthReportRow[] = [];
 
-        for (const pr of prs) {
-            if (!pr.pullRequestId) continue;
+        for (const repo of targetRepos) {
+            console.log(`\nFetching PRs for repository: ${repo.name} (${repo.id})...`);
+            try {
+                // Fetch PRs (max 200) within the selected date range
+                const prs = await fetchPullRequests(gitApi, repo.id, 200, startDate, endDate);
+                console.log(`Found ${prs.length} PRs in ${repo.name}.`);
 
-            console.log(`Processing PR ${pr.pullRequestId}...`);
-            const threads = await fetchPrThreads(gitApi, repoId, pr.pullRequestId);
+                for (const pr of prs) {
+                    if (!pr.pullRequestId) continue;
 
-            const humanCommentCount = countHumanComments(threads);
-            const { leadReviewer, leadReviewerUniqueName, responseHours } = calculateReviewerResponse(pr, threads);
-            const hoursToMerge = calculateHoursToMerge(pr);
+                    console.log(`  Processing PR ${pr.pullRequestId}...`);
+                    const threads = await fetchPrThreads(gitApi, repo.id, pr.pullRequestId);
 
-            const authorIdentifier = pr.createdBy?.uniqueName || pr.createdBy?.displayName;
-            const authorTeam = getTeamForUser(authorIdentifier, teamsMap);
+                    const humanCommentCount = countHumanComments(threads);
+                    const { leadReviewer, leadReviewerUniqueName, responseHours } = calculateReviewerResponse(pr, threads);
+                    const hoursToMerge = calculateHoursToMerge(pr);
 
-            const reviewerIdentifier = leadReviewerUniqueName !== "N/A" ? leadReviewerUniqueName : leadReviewer;
-            const reviewerTeam = leadReviewer !== "N/A" ? getTeamForUser(reviewerIdentifier, teamsMap) : "N/A";
+                    const authorIdentifier = pr.createdBy?.uniqueName || pr.createdBy?.displayName;
+                    const authorTeam = getTeamForUser(authorIdentifier, teamsMap);
 
-            const createdDate = pr.creationDate ? new Date(pr.creationDate) : new Date();
-            const month = createdDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+                    const reviewerIdentifier = leadReviewerUniqueName !== "N/A" ? leadReviewerUniqueName : leadReviewer;
+                    const reviewerTeam = leadReviewer !== "N/A" ? getTeamForUser(reviewerIdentifier, teamsMap) : "N/A";
 
-            records.push({
-                PR_ID: pr.pullRequestId,
-                Author: pr.createdBy?.displayName || "Unknown",
-                Author_Team: authorTeam,
-                Created_Date: createdDate.toISOString().split('T')[0],
-                Month: month,
-                Status: PullRequestStatus[pr.status || 0], // Map enum to string
-                Human_Comment_Count: humanCommentCount,
-                Hours_to_Merge: hoursToMerge,
-                Lead_Reviewer: leadReviewer,
-                Reviewer_Team: reviewerTeam,
-                Reviewer_Response_Hours: responseHours
-            });
+                    const createdDate = pr.creationDate ? new Date(pr.creationDate) : new Date();
+                    const month = createdDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+                    records.push({
+                        PR_ID: pr.pullRequestId,
+                        Repository: repo.name,
+                        Author: pr.createdBy?.displayName || "Unknown",
+                        Author_Team: authorTeam,
+                        Created_Date: createdDate.toISOString().split('T')[0],
+                        Month: month,
+                        Status: PullRequestStatus[pr.status || 0],
+                        Human_Comment_Count: humanCommentCount,
+                        Hours_to_Merge: hoursToMerge,
+                        Lead_Reviewer: leadReviewer,
+                        Reviewer_Team: reviewerTeam,
+                        Reviewer_Response_Hours: responseHours
+                    });
+                }
+            } catch (err: any) {
+                console.error(`Error processing repository ${repo.name}:`, err.message || err);
+            }
+        }
         }
 
         const csvWriter = createObjectCsvWriter({
             path: 'ado_detailed_health.csv',
             header: [
                 { id: 'PR_ID', title: 'PR_ID' },
+                { id: 'Repository', title: 'Repository' },
                 { id: 'Author', title: 'Author' },
                 { id: 'Author_Team', title: 'Author_Team' },
                 { id: 'Created_Date', title: 'Created_Date' },
@@ -272,7 +330,7 @@ export async function run() {
         });
 
         await csvWriter.writeRecords(records);
-        console.log("Report generated: ado_detailed_health.csv");
+        console.log(`\nReport successfully generated for ${targetRepos.length} repositories: ado_detailed_health.csv`);
 
     } catch (err) {
         console.error("Error generating report:", err);

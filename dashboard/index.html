@@ -1,50 +1,226 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-[#090d16]">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADO Health Report</title>
+    <title>ADO Health Report — Multi-Repo Dashboard</title>
+    <!-- Premium Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse for CSV Parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            dark: '#090d16',
+                            card: 'rgba(30, 41, 59, 0.45)',
+                            border: 'rgba(51, 65, 85, 0.5)',
+                            glow: 'rgba(99, 102, 241, 0.15)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Modern Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        /* Custom glassmorphism details */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .glow-card:hover {
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-7xl mx-auto">
-        <h1 class="text-3xl font-bold mb-8 text-gray-800">Project Health Dashboard</h1>
+<body class="font-sans text-slate-200 min-h-full bg-[#0a0f1d] selection:bg-indigo-500 selection:text-white pb-16">
+    <!-- Top Decorative Glows -->
+    <div class="absolute top-0 left-1/4 w-96 h-96 bg-indigo-900/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-emerald-900/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <!-- KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-gray-500 text-sm font-medium">Avg Reviewer Response (Hrs)</h3>
-                <p class="text-3xl font-bold text-blue-600" id="avgResponse">Loading...</p>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-800/80 pb-6 mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    Project Health Dashboard
+                </h1>
+                <p class="text-slate-400 text-sm mt-1">Multi-repository metrics analysis & comparison</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-gray-500 text-sm font-medium">Avg Time to Merge (Hrs)</h3>
-                <p class="text-3xl font-bold text-green-600" id="avgMerge">Loading...</p>
+            
+            <!-- Global Repository Selector -->
+            <div class="flex items-center gap-3">
+                <label for="repoSelector" class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Repository Filter:</label>
+                <div class="relative">
+                    <select id="repoSelector" class="appearance-none bg-slate-900 border border-slate-800 text-slate-100 py-2 pl-4 pr-10 rounded-lg focus:outline-none focus:border-indigo-500 text-sm font-medium shadow-inner transition-colors duration-200 cursor-pointer">
+                        <option value="ALL">All Repositories</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-gray-500 text-sm font-medium">Total PRs Analyzed</h3>
-                <p class="text-3xl font-bold text-purple-600" id="totalPRs">Loading...</p>
+        </header>
+
+        <!-- KPI Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="glass-panel p-6 rounded-2xl shadow-xl transition-all duration-300 glow-card group">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Avg Reviewer Response</h3>
+                    <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg group-hover:bg-indigo-500/20 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <p class="text-3xl font-extrabold text-white" id="avgResponse">Loading...</p>
+                    <span class="text-xs text-slate-500">hours</span>
+                </div>
+                <div class="mt-2 text-xs text-slate-500 border-t border-slate-800/40 pt-2 flex justify-between">
+                    <span>Target: &lt; 24h</span>
+                    <span id="responseStatus" class="font-semibold text-emerald-400">-</span>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl shadow-xl transition-all duration-300 glow-card group">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Avg Hours to Merge</h3>
+                    <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg group-hover:bg-emerald-500/20 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <p class="text-3xl font-extrabold text-white" id="avgMerge">Loading...</p>
+                    <span class="text-xs text-slate-500">hours</span>
+                </div>
+                <div class="mt-2 text-xs text-slate-500 border-t border-slate-800/40 pt-2 flex justify-between">
+                    <span>Active PR Cycles</span>
+                    <span id="mergeStatus" class="font-semibold text-slate-400">-</span>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl shadow-xl transition-all duration-300 glow-card group">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Avg Comments / PR</h3>
+                    <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg group-hover:bg-amber-500/20 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path></svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <p class="text-3xl font-extrabold text-white" id="avgComments">Loading...</p>
+                    <span class="text-xs text-slate-500">comments</span>
+                </div>
+                <div class="mt-2 text-xs text-slate-500 border-t border-slate-800/40 pt-2 flex justify-between">
+                    <span>Human only</span>
+                    <span id="engagementStatus" class="font-semibold text-slate-400">-</span>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-2xl shadow-xl transition-all duration-300 glow-card group">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total PRs Analyzed</h3>
+                    <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg group-hover:bg-purple-500/20 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <p class="text-3xl font-extrabold text-white" id="totalPRs">Loading...</p>
+                    <span class="text-xs text-slate-500">pull requests</span>
+                </div>
+                <div class="mt-2 text-xs text-slate-500 border-t border-slate-800/40 pt-2 flex justify-between">
+                    <span>Across active repos</span>
+                    <span id="activeReposCount" class="font-semibold text-purple-400">-</span>
+                </div>
             </div>
         </div>
 
-        <!-- Charts Row 1 -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold mb-4">PRs by Author</h3>
-                <canvas id="authorChart"></canvas>
+        <!-- Comparative View Charts Row -->
+        <div id="comparativeChartsRow" class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Repo Performance Comparison (Response vs Merge) -->
+            <div class="glass-panel p-6 rounded-2xl shadow-xl lg:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">Repository Performance Comparison</h3>
+                        <p class="text-slate-400 text-xs mt-1">Average Response Hours vs. Average Merge Time by Repository</p>
+                    </div>
+                </div>
+                <div class="relative h-80">
+                    <canvas id="repoComparisonChart"></canvas>
+                </div>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold mb-4">Reviewer Response Time Distribution</h3>
-                <canvas id="responseChart"></canvas>
+            
+            <!-- PR Share by Repository -->
+            <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white">PR Volume Distribution</h3>
+                        <p class="text-slate-400 text-xs mt-1">Repository contribution to total analyzed pull requests</p>
+                    </div>
+                </div>
+                <div class="relative h-80 flex items-center justify-center">
+                    <canvas id="repoVolumeChart"></canvas>
+                </div>
             </div>
         </div>
 
-         <!-- Charts Row 2 -->
-         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-lg font-semibold mb-4">PR Status Breakdown</h3>
-                <canvas id="statusChart"></canvas>
+        <!-- Analytics Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Reviewer Response Time Distribution -->
+            <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                <h3 class="text-lg font-bold text-white mb-1">Response Time distribution</h3>
+                <p class="text-slate-400 text-xs mb-4">Breakdown of time taken for reviewers to respond</p>
+                <div class="relative h-64 flex items-center justify-center">
+                    <canvas id="responseChart"></canvas>
+                </div>
+            </div>
+
+            <!-- PRs by Author -->
+            <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                <h3 class="text-lg font-bold text-white mb-1">Top PR Authors</h3>
+                <p class="text-slate-400 text-xs mb-4">Number of PRs submitted by contributor</p>
+                <div class="relative h-64">
+                    <canvas id="authorChart"></canvas>
+                </div>
+            </div>
+
+            <!-- PR Status Breakdown -->
+            <div class="glass-panel p-6 rounded-2xl shadow-xl">
+                <h3 class="text-lg font-bold text-white mb-1">PR Status Breakdown</h3>
+                <p class="text-slate-400 text-xs mb-4">Distribution of PR states (Completed, Active, Abandoned)</p>
+                <div class="relative h-64 flex items-center justify-center">
+                    <canvas id="statusChart"></canvas>
+                </div>
             </div>
             <div class="bg-white p-6 rounded-lg shadow">
                 <h3 class="text-lg font-semibold mb-4">PRs by Team</h3>
@@ -52,27 +228,38 @@
             </div>
         </div>
 
-        <!-- Data Table -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="p-6 border-b">
-                <h3 class="text-lg font-semibold">Detailed Data</h3>
+        <!-- Data Table Section -->
+        <div class="glass-panel rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-6 border-b border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-950/20">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Detailed Metrics Log</h3>
+                    <p class="text-slate-400 text-xs mt-1">List of analyzed pull requests with key health stats</p>
+                </div>
+                <!-- Mini search bar inside dashboard -->
+                <div class="relative w-full sm:w-64">
+                    <input type="text" id="tableSearch" placeholder="Search by Author/PR ID..." class="w-full bg-slate-900 border border-slate-800 rounded-lg py-1.5 pl-9 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all duration-200">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
+            <div class="overflow-x-auto max-h-[500px]">
+                <table class="min-w-full divide-y divide-slate-800/80">
+                    <thead class="bg-slate-950/50 sticky top-0 backdrop-blur-md z-10">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PR ID</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Author Team</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reviewer Team</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Response (Hrs)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Merge (Hrs)</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Repository</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">PR ID</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Author</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Author Team</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Reviewer Team</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Response</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Merge Time</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200" id="tableBody">
-                        <!-- Rows will be inserted here -->
+                    <tbody class="divide-y divide-slate-800/40 bg-slate-900/10" id="tableBody">
+                        <!-- Rows dynamically generated -->
                     </tbody>
                 </table>
             </div>
@@ -80,154 +267,520 @@
     </div>
 
     <script>
+        // Global variables to hold parsed data and active charts
+        let rawData = [];
+        let activeRepo = "ALL";
+        const charts = {};
+
+        // Color palettes
+        const COLORS = {
+            indigo: 'rgba(99, 102, 241, 0.7)',
+            indigoBorder: 'rgb(99, 102, 241)',
+            emerald: 'rgba(16, 185, 129, 0.7)',
+            emeraldBorder: 'rgb(16, 185, 129)',
+            amber: 'rgba(245, 158, 11, 0.7)',
+            amberBorder: 'rgb(245, 158, 11)',
+            rose: 'rgba(239, 68, 68, 0.7)',
+            roseBorder: 'rgb(239, 68, 68)',
+            purple: 'rgba(139, 92, 246, 0.7)',
+            purpleBorder: 'rgb(139, 92, 246)',
+            slate: 'rgba(148, 163, 184, 0.5)',
+            slateBorder: 'rgb(148, 163, 184)',
+            grid: '#1e293b',
+            text: '#94a3b8'
+        };
+
+        const REPO_BADGE_COLORS = {
+            'web-frontend': 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
+            'core-api': 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+            'infra-pipeline': 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+        };
+
+        // Load CSV Data
         Papa.parse('../ado_detailed_health.csv', {
             download: true,
             header: true,
             complete: function(results) {
-                const data = results.data.filter(row => row.PR_ID); // Filter empty rows
-                processData(data);
+                // Filter out empty rows (where PR_ID is undefined or blank)
+                rawData = results.data.filter(row => row.PR_ID && row.PR_ID.trim() !== "");
+                initializeDashboard();
             },
             error: function(err) {
                 console.error("Error parsing CSV:", err);
-                alert("Failed to load CSV data. Make sure 'ado_detailed_health.csv' exists in the root.");
+                alert("Failed to load CSV data. Run report generation first to create 'ado_detailed_health.csv'.");
             }
         });
 
-        function processData(data) {
-            // Calculate KPIs
+        // Initialize elements, extract repo names, bind events
+        function initializeDashboard() {
+            // Find unique repositories
+            const repos = [...new Set(rawData.map(item => item.Repository || 'default'))].filter(Boolean);
+            
+            // Populate repository selector
+            const selector = document.getElementById('repoSelector');
+            repos.forEach(repo => {
+                const opt = document.createElement('option');
+                opt.value = repo;
+                opt.textContent = repo;
+                selector.appendChild(opt);
+            });
+
+            // Bind selector change
+            selector.addEventListener('change', (e) => {
+                activeRepo = e.target.value;
+                updateDashboard();
+            });
+
+            // Bind search bar input
+            document.getElementById('tableSearch').addEventListener('input', () => {
+                renderTable();
+            });
+
+            // Initial render
+            updateDashboard();
+        }
+
+        // Main update pipeline
+        function updateDashboard() {
+            // 1. Filter Data
+            const filteredData = activeRepo === "ALL" 
+                ? rawData 
+                : rawData.filter(item => item.Repository === activeRepo);
+
+            // 2. Render Cards
+            renderKpis(filteredData);
+
+            // 3. Render Charts
+            renderRepoComparisonCharts();
+            renderResponseTimeChart(filteredData);
+            renderAuthorChart(filteredData);
+            renderStatusChart(filteredData);
+            renderTeamChart(filteredData);
+
+            // 4. Render Log Table
+            renderTable();
+        }
+
+        // Calculation of KPI Summaries
+        function renderKpis(data) {
             const totalPRs = data.length;
 
             const mergeTimes = data
                 .map(r => parseFloat(r.Hours_to_Merge))
                 .filter(n => !isNaN(n));
-            const avgMerge = mergeTimes.reduce((a, b) => a + b, 0) / mergeTimes.length || 0;
+            const avgMerge = mergeTimes.length ? mergeTimes.reduce((a, b) => a + b, 0) / mergeTimes.length : 0;
 
             const responseTimes = data
                 .map(r => parseFloat(r.Reviewer_Response_Hours))
                 .filter(n => !isNaN(n));
-            const avgResponse = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length || 0;
+            const avgResponse = responseTimes.length ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length : 0;
 
+            const comments = data
+                .map(r => parseInt(r.Human_Comment_Count))
+                .filter(n => !isNaN(n));
+            const avgComments = comments.length ? comments.reduce((a, b) => a + b, 0) / comments.length : 0;
+
+            const uniqueRepos = [...new Set(rawData.map(r => r.Repository))].filter(Boolean).length;
+
+            // Animate counts
             document.getElementById('totalPRs').textContent = totalPRs;
-            document.getElementById('avgMerge').textContent = avgMerge.toFixed(1);
-            document.getElementById('avgResponse').textContent = avgResponse.toFixed(1);
+            document.getElementById('avgMerge').textContent = avgMerge ? avgMerge.toFixed(1) : "N/A";
+            document.getElementById('avgResponse').textContent = avgResponse ? avgResponse.toFixed(1) : "N/A";
+            document.getElementById('avgComments').textContent = avgComments ? avgComments.toFixed(1) : "0.0";
+            
+            document.getElementById('activeReposCount').textContent = `${uniqueRepos} Active`;
 
-            // PRs by Author Chart
+            // Status Indicator details
+            const responseStatusText = document.getElementById('responseStatus');
+            if (avgResponse === 0) {
+                responseStatusText.textContent = "No data";
+                responseStatusText.className = "font-semibold text-slate-400";
+            } else if (avgResponse < 12) {
+                responseStatusText.textContent = "Fast";
+                responseStatusText.className = "font-semibold text-emerald-400";
+            } else if (avgResponse <= 24) {
+                responseStatusText.textContent = "Fair";
+                responseStatusText.className = "font-semibold text-amber-400";
+            } else {
+                responseStatusText.textContent = "Slow";
+                responseStatusText.className = "font-semibold text-rose-400";
+            }
+
+            const completedPrs = data.filter(r => r.Status === 'Completed').length;
+            document.getElementById('mergeStatus').textContent = `${completedPrs} Merged`;
+
+            document.getElementById('engagementStatus').textContent = `${data.filter(r => parseInt(r.Human_Comment_Count) > 5).length} High Activity`;
+        }
+
+        // Render Side-by-side repository comparison (Visible only when "All" is active)
+        function renderRepoComparisonCharts() {
+            const compRow = document.getElementById('comparativeChartsRow');
+            
+            // If repository selection is specific, we hide/fade comparative charts to save screen real estate,
+            // or we keep them active but highlight the target. Let's keep them visible but just render the full org state.
+            
+            const repos = [...new Set(rawData.map(r => r.Repository || 'default'))].filter(Boolean);
+            
+            // Calculate statistics per repository
+            const repoStats = repos.map(repo => {
+                const repoData = rawData.filter(r => r.Repository === repo);
+                const total = repoData.length;
+                
+                const mergeTimes = repoData.map(r => parseFloat(r.Hours_to_Merge)).filter(n => !isNaN(n));
+                const avgMerge = mergeTimes.length ? mergeTimes.reduce((a, b) => a + b, 0) / mergeTimes.length : 0;
+                
+                const responseTimes = repoData.map(r => parseFloat(r.Reviewer_Response_Hours)).filter(n => !isNaN(n));
+                const avgResponse = responseTimes.length ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length : 0;
+
+                return { repo, total, avgMerge, avgResponse };
+            });
+
+            // 1. Comparison Bar Chart
+            if (charts.repoComparison) charts.repoComparison.destroy();
+            
+            const ctxComp = document.getElementById('repoComparisonChart').getContext('2d');
+            charts.repoComparison = new Chart(ctxComp, {
+                type: 'bar',
+                data: {
+                    labels: repoStats.map(s => s.repo),
+                    datasets: [
+                        {
+                            label: 'Avg Response Time (Hrs)',
+                            data: repoStats.map(s => s.avgResponse),
+                            backgroundColor: COLORS.indigo,
+                            borderColor: COLORS.indigoBorder,
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        },
+                        {
+                            label: 'Avg Hours to Merge',
+                            data: repoStats.map(s => s.avgMerge),
+                            backgroundColor: COLORS.emerald,
+                            borderColor: COLORS.emeraldBorder,
+                            borderWidth: 1.5,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: COLORS.text, font: { family: 'Plus Jakarta Sans', size: 11 } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: COLORS.grid },
+                            ticks: { color: COLORS.text, font: { family: 'Plus Jakarta Sans', size: 11 } }
+                        },
+                        y: {
+                            grid: { color: COLORS.grid },
+                            ticks: { color: COLORS.text, font: { family: 'Plus Jakarta Sans', size: 11 } }
+                        }
+                    }
+                }
+            });
+
+            // 2. Repo PR Volume Doughnut Chart
+            if (charts.repoVolume) charts.repoVolume.destroy();
+            const ctxVol = document.getElementById('repoVolumeChart').getContext('2d');
+            
+            const backgroundColors = [COLORS.indigo, COLORS.emerald, COLORS.purple, COLORS.amber, COLORS.rose];
+            const borderColors = [COLORS.indigoBorder, COLORS.emeraldBorder, COLORS.purpleBorder, COLORS.amberBorder, COLORS.roseBorder];
+
+            charts.repoVolume = new Chart(ctxVol, {
+                type: 'doughnut',
+                data: {
+                    labels: repoStats.map(s => s.repo),
+                    datasets: [{
+                        data: repoStats.map(s => s.total),
+                        backgroundColor: backgroundColors.slice(0, repos.length),
+                        borderColor: borderColors.slice(0, repos.length),
+                        borderWidth: 2,
+                        hoverOffset: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '65%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: COLORS.text,
+                                boxWidth: 12,
+                                padding: 15,
+                                font: { family: 'Plus Jakarta Sans', size: 11 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render response distributions
+        function renderResponseTimeChart(data) {
+            if (charts.response) charts.response.destroy();
+
+            const responseTimes = data
+                .map(r => parseFloat(r.Reviewer_Response_Hours))
+                .filter(n => !isNaN(n));
+
+            const responseBins = ['< 1h', '1-4h', '4-12h', '12-24h', '> 24h'];
+            const responseCounts = [0, 0, 0, 0, 0];
+
+            responseTimes.forEach(t => {
+                if (t < 1) responseCounts[0]++;
+                else if (t < 4) responseCounts[1]++;
+                else if (t < 12) responseCounts[2]++;
+                else if (t < 24) responseCounts[3]++;
+                else responseCounts[4]++;
+            });
+
+            const ctx = document.getElementById('responseChart').getContext('2d');
+            charts.response = new Chart(ctx, {
+                type: 'polarArea',
+                data: {
+                    labels: responseBins,
+                    datasets: [{
+                        data: responseCounts,
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.65)',  // Emerald
+                            'rgba(132, 204, 22, 0.65)',  // Lime
+                            'rgba(245, 158, 11, 0.65)',  // Amber
+                            'rgba(249, 115, 22, 0.65)',  // Orange
+                            'rgba(239, 68, 68, 0.65)'    // Rose
+                        ],
+                        borderColor: '#0a0f1d',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            grid: { color: COLORS.grid },
+                            angleLines: { color: COLORS.grid },
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: COLORS.text, boxWidth: 10, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render authors bar chart
+        function renderAuthorChart(data) {
+            if (charts.author) charts.author.destroy();
+
             const authorCounts = {};
             data.forEach(r => {
                 authorCounts[r.Author] = (authorCounts[r.Author] || 0) + 1;
             });
 
-            new Chart(document.getElementById('authorChart'), {
+            // Sort authors by PR count descending, take top 8
+            const sortedAuthors = Object.entries(authorCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+
+            const ctx = document.getElementById('authorChart').getContext('2d');
+            charts.author = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(authorCounts),
+                    labels: sortedAuthors.map(item => item[0]),
                     datasets: [{
-                        label: 'Number of PRs',
-                        data: Object.values(authorCounts),
-                        backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                        borderColor: 'rgb(59, 130, 246)',
-                        borderWidth: 1
+                        label: 'PRs Submitted',
+                        data: sortedAuthors.map(item => item[1]),
+                        backgroundColor: COLORS.purple,
+                        borderColor: COLORS.purpleBorder,
+                        borderWidth: 1.5,
+                        borderRadius: 4
                     }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: COLORS.grid },
+                            ticks: { color: COLORS.text, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: COLORS.text, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    }
                 }
             });
+        }
 
-             // Reviewer Response Chart (Histogram-ish)
-             const responseBins = ['< 1h', '1-4h', '4-12h', '12-24h', '> 24h'];
-             const responseCounts = [0, 0, 0, 0, 0];
+        // Render statuses pie chart
+        function renderStatusChart(data) {
+            if (charts.status) charts.status.destroy();
 
-             responseTimes.forEach(t => {
-                 if (t < 1) responseCounts[0]++;
-                 else if (t < 4) responseCounts[1]++;
-                 else if (t < 12) responseCounts[2]++;
-                 else if (t < 24) responseCounts[3]++;
-                 else responseCounts[4]++;
-             });
-
-             new Chart(document.getElementById('responseChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: responseBins,
-                    datasets: [{
-                        data: responseCounts,
-                         backgroundColor: [
-                            'rgb(34, 197, 94)',
-                            'rgb(132, 204, 22)',
-                            'rgb(234, 179, 8)',
-                            'rgb(249, 115, 22)',
-                            'rgb(239, 68, 68)'
-                        ]
-                    }]
-                }
-            });
-
-            // Status Chart
             const statusCounts = {};
             data.forEach(r => {
                  statusCounts[r.Status] = (statusCounts[r.Status] || 0) + 1;
             });
 
-            new Chart(document.getElementById('statusChart'), {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            charts.status = new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: Object.keys(statusCounts),
                     datasets: [{
                         data: Object.values(statusCounts),
                         backgroundColor: [
-                            'rgb(34, 197, 94)', // Completed
-                            'rgb(59, 130, 246)', // Active
-                             'rgb(156, 163, 175)', // Abandoned (Gray)
-                        ]
+                            'rgba(16, 185, 129, 0.75)', // Completed -> Emerald
+                            'rgba(59, 130, 246, 0.75)',  // Active -> Blue
+                            'rgba(100, 116, 139, 0.75)'  // Abandoned -> Slate
+                        ],
+                        borderColor: '#0a0f1d',
+                        borderWidth: 2
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: COLORS.text, boxWidth: 10, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    }
                 }
             });
+        }
 
-            // Team Chart
+        // Render team bar chart
+        function renderTeamChart(data) {
+            if (charts.team) charts.team.destroy();
+
             const teamCounts = {};
             data.forEach(r => {
                  teamCounts[r.Author_Team] = (teamCounts[r.Author_Team] || 0) + 1;
             });
 
-            new Chart(document.getElementById('teamChart'), {
+            const ctx = document.getElementById('teamChart').getContext('2d');
+            charts.team = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: Object.keys(teamCounts),
                     datasets: [{
                         label: 'Number of PRs',
                         data: Object.values(teamCounts),
-                        backgroundColor: 'rgba(16, 185, 129, 0.5)',
-                        borderColor: 'rgb(16, 185, 129)',
-                        borderWidth: 1
+                        backgroundColor: COLORS.emerald,
+                        borderColor: COLORS.emeraldBorder,
+                        borderWidth: 1.5,
+                        borderRadius: 4
                     }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: COLORS.grid },
+                            ticks: { color: COLORS.text, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        },
+                        y: {
+                            grid: { color: COLORS.grid },
+                            ticks: { color: COLORS.text, font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    }
                 }
             });
+        }
 
-            // Populate Table (First 10 rows)
+        // Render log rows table with repository filters and searches
+        function renderTable() {
             const tableBody = document.getElementById('tableBody');
-            data.slice(0, 50).forEach(row => {
+            tableBody.innerHTML = '';
+
+            const searchValue = document.getElementById('tableSearch').value.toLowerCase();
+
+            // Filter data by active repo AND search parameters
+            let rows = activeRepo === "ALL" 
+                ? rawData 
+                : rawData.filter(item => item.Repository === activeRepo);
+
+            if (searchValue) {
+                rows = rows.filter(item => 
+                    item.Author.toLowerCase().includes(searchValue) || 
+                    item.PR_ID.toLowerCase().includes(searchValue) ||
+                    (item.Repository && item.Repository.toLowerCase().includes(searchValue))
+                );
+            }
+
+            if (rows.length === 0) {
                 const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="9" class="px-6 py-8 text-center text-sm text-slate-500 bg-slate-900/10">No matching pull request entries found.</td>`;
+                tableBody.appendChild(tr);
+                return;
+            }
+
+            // Populate rows (limit to 100 rows for DOM performance)
+            rows.slice(0, 100).forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/25 transition-colors duration-150";
+                
+                // Styling repository badge
+                const repoName = row.Repository || 'default';
+                const badgeStyle = REPO_BADGE_COLORS[repoName] || 'bg-slate-800 text-slate-300 border border-slate-700/50';
+
                 tr.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${row.PR_ID}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Author}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Author_Team || 'Unknown'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(row.Status)}">
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm">
+                        <span class="px-2 py-0.5 inline-flex text-xs font-semibold rounded-md ${badgeStyle}">
+                            ${repoName}
+                        </span>
+                    </td>
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm font-semibold text-slate-300">#${row.PR_ID}</td>
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm text-slate-300">${row.Author}</td>
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm text-slate-400">${row.Author_Team || 'Unknown'}</td>
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm">
+                        <span class="px-2.5 py-0.5 inline-flex text-xs font-medium rounded-full ${getStatusColor(row.Status)}">
                             ${row.Status}
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Created_Date}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Reviewer_Team || 'N/A'}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Reviewer_Response_Hours}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.Hours_to_Merge}</td>
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm text-slate-400">${row.Created_Date}</td>
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm text-slate-400">${row.Reviewer_Team || 'N/A'}</td>
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm text-slate-300 font-medium">${formatHours(row.Reviewer_Response_Hours)}</td>
+                    <td class="px-6 py-3.5 whitespace-nowrap text-sm text-slate-300 font-medium">${formatHours(row.Hours_to_Merge)}</td>
                 `;
                 tableBody.appendChild(tr);
             });
         }
 
+        // Helper formatting functions
+        function formatHours(val) {
+            if (val === 'N/A' || !val) return '<span class="text-slate-600">—</span>';
+            const num = parseFloat(val);
+            if (isNaN(num)) return val;
+            return `${num.toFixed(1)}h`;
+        }
+
         function getStatusColor(status) {
-            if (status === 'Completed') return 'bg-green-100 text-green-800';
-            if (status === 'Active') return 'bg-blue-100 text-blue-800';
-            if (status === 'Abandoned') return 'bg-gray-100 text-gray-800';
-            return 'bg-gray-100 text-gray-800';
+            if (status === 'Completed') return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+            if (status === 'Active') return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+            if (status === 'Abandoned') return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
+            return 'bg-slate-800 text-slate-300';
         }
     </script>
 </body>

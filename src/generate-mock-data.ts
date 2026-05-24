@@ -4,6 +4,7 @@ import { HealthReportRow } from "./generate-report";
 const authors = ["Alice", "Bob", "Charlie", "David", "Eve"];
 const reviewers = ["Frank", "Grace", "Heidi", "Ivan", "Judy"];
 const statuses = ["Completed", "Active", "Abandoned"];
+const mockRepos = ["web-frontend", "core-api", "infra-pipeline"];
 
 const mockTeamsMap: Record<string, string[]> = {
     "Team Alpha": ["Alice", "Bob", "Frank", "Grace"],
@@ -30,13 +31,15 @@ function getRandomItem(arr: string[]) {
 
 async function generateMockData() {
     const records: HealthReportRow[] = [];
-    const startDate = new Date("2023-01-01");
     const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 60);
 
-    for (let i = 1; i <= 50; i++) {
+    for (let i = 1; i <= 80; i++) { // Increased to 80 for better comparative views
         const createdDate = new Date(startDate.getTime() + Math.random() * (endDate.getTime() - startDate.getTime()));
         const month = createdDate.toLocaleString('default', { month: 'long', year: 'numeric' });
         const status = getRandomItem(statuses);
+        const repository = getRandomItem(mockRepos);
 
         let hoursToMerge = "N/A";
         if (status === "Completed") {
@@ -54,6 +57,7 @@ async function generateMockData() {
 
         records.push({
             PR_ID: 1000 + i,
+            Repository: repository,
             Author: author,
             Author_Team: getTeamForMockUser(author),
             Created_Date: createdDate.toISOString().split('T')[0],
@@ -71,6 +75,7 @@ async function generateMockData() {
         path: 'ado_detailed_health.csv',
         header: [
             {id: 'PR_ID', title: 'PR_ID'},
+            {id: 'Repository', title: 'Repository'},
             {id: 'Author', title: 'Author'},
             {id: 'Author_Team', title: 'Author_Team'},
             {id: 'Created_Date', title: 'Created_Date'},
